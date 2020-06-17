@@ -10,5 +10,6 @@ libraryDependencies += twitterServer % Compile
 libraryDependencies += finchCore % Compile
 libraryDependencies += finagleHttp % Compile
 libraryDependencies += twitterUtil % Compile
+libraryDependencies += finagleRedis % Compile
 libraryDependencies += scalaMock % Test
 libraryDependencies += scalaTest % Test

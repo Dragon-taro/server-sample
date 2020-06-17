@@ -5,6 +5,6 @@ import domain.entity.auth.SessionId
 import domain.entity.user.UserAttributes.UserId
 
 trait AuthRepository {
-  def GetSession(sessId: SessionId): Future[UserId]
+  def GetSession(sessId: SessionId): Future[Option[UserId]]
   def SetSession(userId: UserId): Future[SessionId]
 }

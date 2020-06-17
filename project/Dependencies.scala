@@ -13,7 +13,10 @@ object Dependencies {
   lazy val finchCore = "com.github.finagle" %% "finch-core" % Versions.finch
   lazy val finagleHttp = "com.twitter" %% "finagle-http" % Versions.finagle
   lazy val twitterServer = "com.twitter" %% "twitter-server" % Versions.twServer
+
+  // others
   lazy val twitterUtil = "com.twitter" %% "util-core" % "6.42.0"
+  lazy val finagleRedis = "com.twitter" %% "finagle-redis" % Versions.finagle
 
   // test
   lazy val scalaTest = "org.scalatest" %% "scalatest" % Versions.scalaTest

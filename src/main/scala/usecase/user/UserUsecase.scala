@@ -1,10 +1,11 @@
 package usecase.user
 
-import java.util.Date
-
 import com.twitter.util.Future
 import domain.entity.auth.SessionId
-import domain.entity.errors.InvalidUserIdOrPasswordException
+import domain.entity.errors.{
+  InvalidUserIdOrPasswordException,
+  UnauthorizedException
+}
 import domain.entity.user.UserAttributes.{Password, UserId}
 import interface.repository.{UsesAuthRepository, UsesUserRepository}
 
@@ -24,6 +25,10 @@ trait UserUsecase extends UsesAuthRepository with UsesUserRepository {
     } yield sessId
   }
 
-  def auth(sessId: SessionId): Future[UserId]
+  def auth(sessId: SessionId): Future[UserId] =
+    authRepository.GetSession(sessId).flatMap {
+      case Some(value) => Future(value)
+      case None        => Future.exception(UnauthorizedException)
+    }
 
 }

@@ -6,12 +6,15 @@ import com.twitter.util.Future
 import domain.entity.auth.SessionId
 import domain.entity.user.UserAttributes.UserId
 import domain.repository.auth.AuthRepository
+import infra.datastore.redis.{UsesRedis, MixInRedis}
 
-trait AuthRepositoryImpl extends AuthRepository {
-  def GetSession(sessId: SessionId): Future[UserId] = ???
+trait AuthRepositoryImpl extends AuthRepository with UsesRedis {
+  def GetSession(sessId: SessionId): Future[Option[UserId]] =
+    redis.get(sessId.value).map(_.map(UserId)) // voのデコード・エンコードを実装した方がきれいではありそう
 
   def SetSession(userId: UserId): Future[SessionId] = {
-    Future(createSessionId(userId))
+    val sessId = createSessionId(userId)
+    redis.set(sessId.value, userId.value).map(_ => sessId)
   }
 
   private def createSessionId(userId: UserId): SessionId = {
@@ -21,12 +24,12 @@ trait AuthRepositoryImpl extends AuthRepository {
   }
 }
 
-object AuthRepositoryImpl extends AuthRepositoryImpl
+object AuthRepositoryImpl extends AuthRepositoryImpl with MixInRedis
 
 trait UsesAuthRepository {
   val authRepository: AuthRepository
 }
 
-object MixInAuthRepository {
+trait MixInAuthRepository {
   val authRepository: AuthRepository = AuthRepositoryImpl
 }
