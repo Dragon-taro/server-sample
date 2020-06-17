@@ -1,5 +1,7 @@
 package domain.entity.user
 
+import java.sql.Date
+
 import domain.entity.user.UserAttributes.{
   EmailAddress,
   Id,
@@ -15,5 +17,5 @@ case class User(id: Id,
                 userId: UserId,
                 password: Password,
                 role: Role,
-                createdAt: String,
-                updatedAt: String)
+                createdAt: Date,
+                updatedAt: Date)

@@ -7,15 +7,18 @@ import domain.entity.errors.{
   UnauthorizedException
 }
 import domain.entity.user.UserAttributes.{Password, UserId}
-import interface.repository.{UsesAuthRepository, UsesUserRepository}
+import interface.repository.auth.{MixInAuthRepository, UsesAuthRepository}
+import interface.repository.user.{MixInUserRepository, UsesUserRepository}
 
 trait UserUsecase extends UsesAuthRepository with UsesUserRepository {
   def login(userId: UserId, pass: Password): Future[SessionId] = {
     for {
       user <- userRepository
         .FindById(userId)
-        // ここでエラーの変換をしたい
-        // UserNotFound → InvalidUserIdOrPasswordException
+        .flatMap {
+          case Some(user) => Future(user)
+          case None       => Future.exception(InvalidUserIdOrPasswordException)
+        }
         .flatMap(
           user =>
             if (user.password == pass) Future(user)
@@ -30,5 +33,17 @@ trait UserUsecase extends UsesAuthRepository with UsesUserRepository {
       case Some(value) => Future(value)
       case None        => Future.exception(UnauthorizedException)
     }
+}
 
+object UserUsecase
+    extends UserUsecase
+    with MixInAuthRepository
+    with MixInUserRepository
+
+trait UsesUserUsecase {
+  val userUsecase: UserUsecase
+}
+
+trait MixInUserUsecase {
+  val userUsecase: UserUsecase = UserUsecase
 }

@@ -1,4 +1,4 @@
-package interface.repository
+package interface.repository.auth
 
 import java.util.Date
 
