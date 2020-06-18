@@ -1,10 +1,13 @@
 package infra.datastore.sql
 
-import com.twitter.finagle.Mysql.newRichClient
-import com.twitter.finagle.mysql.Client
+import com.twitter.finagle.Mysql
+import com.twitter.finagle.mysql._
 
 trait Sql {
-  val client: Client = newRichClient("root:pass@tcp(localhost:13306)/adserver")
+  val client: Client = Mysql.client
+    .withCredentials("root", "pass")
+    .withDatabase("adserver")
+    .newRichClient("localhost:13306")
 }
 
 object Sql extends Sql

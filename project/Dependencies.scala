@@ -16,6 +16,7 @@ object Dependencies {
 
   // others
   lazy val twitterUtil = "com.twitter" %% "util-core" % "6.42.0"
+  lazy val finagleCore = "com.twitter" %% "finagle-core" % Versions.finagle
   lazy val finagleRedis = "com.twitter" %% "finagle-redis" % Versions.finagle
   lazy val finagleMySQL = "com.twitter" %% "finagle-mysql" % Versions.finagle
 

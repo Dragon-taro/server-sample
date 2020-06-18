@@ -1,8 +1,6 @@
 package interface.repository.user
 
-import java.sql.Date
-
-import com.twitter.finagle.mysql.Row
+import com.twitter.finagle.mysql._
 import com.twitter.util.Future
 import domain.entity.user.User
 import domain.entity.user.UserAttributes.{
