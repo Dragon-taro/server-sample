@@ -13,5 +13,5 @@ libraryDependencies += twitterUtil % Compile
 libraryDependencies += finagleCore % Compile
 libraryDependencies += finagleRedis % Compile
 libraryDependencies += finagleMySQL % Compile
-libraryDependencies += scalaMock % Test
-libraryDependencies += scalaTest % Test
+libraryDependencies += scalaMock % Compile
+libraryDependencies += scalaTest % Compile

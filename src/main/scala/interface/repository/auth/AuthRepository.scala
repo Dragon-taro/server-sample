@@ -1,30 +1,31 @@
 package interface.repository.auth
 
-import java.util.Date
-
 import com.twitter.util.Future
 import domain.entity.auth.SessionId
 import domain.entity.user.UserAttributes.UserId
 import domain.repository.auth.AuthRepository
-import infra.datastore.redis.{UsesRedis, MixInRedis}
+import infra.datastore.redis.{MixInRedis, UsesRedis}
+import utils.{MixInDate, UsesDate}
 
-trait AuthRepositoryImpl extends AuthRepository with UsesRedis {
-  def GetSession(sessId: SessionId): Future[Option[UserId]] =
-    redis.get(sessId.value).map(_.map(UserId)) // voのデコード・エンコードを実装した方がきれいではありそう
+trait AuthRepositoryImpl extends AuthRepository with UsesRedis with UsesDate {
+  def getSession(sessId: SessionId): Future[Option[UserId]] =
+    redis.get(sessId.value).map(_.map(UserId)) // voのデコード・エンコードを抽象化した方がきれいではありそう
 
-  def SetSession(userId: UserId): Future[SessionId] = {
+  def setSession(userId: UserId): Future[SessionId] = {
     val sessId = createSessionId(userId)
     redis.set(sessId.value, userId.value).map(_ => sessId)
   }
 
   private def createSessionId(userId: UserId): SessionId = {
-    val now = new Date
-    val sessId = userId.value + now.toString
+    val sessId = userId.value + date.nowToString
     SessionId(sessId)
   }
 }
 
-object AuthRepositoryImpl extends AuthRepositoryImpl with MixInRedis
+object AuthRepositoryImpl
+    extends AuthRepositoryImpl
+    with MixInRedis
+    with MixInDate
 
 trait UsesAuthRepository {
   val authRepository: AuthRepository

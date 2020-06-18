@@ -19,10 +19,9 @@ import domain.entity.user.UserAttributes.{
 }
 import domain.repository.auth.AuthRepository
 import domain.repository.user.UserRepository
-import org.scalamock.scalatest.MockFactory
-import org.scalatest._
+import utils.DTTest
 
-class UserUsecaseTest extends FunSpec with MockFactory with Matchers {
+class UserUsecaseTest extends DTTest {
 
   val mockAuthRepository = mock[AuthRepository]
   val mockUserRepository = mock[UserRepository]
@@ -104,7 +103,7 @@ class UserUsecaseTest extends FunSpec with MockFactory with Matchers {
           .expects(defaultUserId)
           .once()
           .returning(Future(Some(defaultUser)))
-        (mockAuthRepository.SetSession _)
+        (mockAuthRepository.setSession _)
           .expects(defaultUserId)
           .returning(Future(expects))
 
@@ -119,7 +118,7 @@ class UserUsecaseTest extends FunSpec with MockFactory with Matchers {
     describe("sessionIdがないとき") {
       it("UnauthorizedExceptionを返すこと") {
         val sessId = SessionId("mockSessionId")
-        (mockAuthRepository.GetSession _)
+        (mockAuthRepository.getSession _)
           .expects(sessId)
           .returning(Future(None))
 
@@ -137,7 +136,7 @@ class UserUsecaseTest extends FunSpec with MockFactory with Matchers {
     describe("sessionIdがあるとき") {
       it("UserIdを返すこと") {
         val sessId = SessionId("mockSessionId")
-        (mockAuthRepository.GetSession _)
+        (mockAuthRepository.getSession _)
           .expects(sessId)
           .returning(Future(Some(defaultUserId)))
 

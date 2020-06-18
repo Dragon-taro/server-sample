@@ -24,12 +24,12 @@ trait UserUsecase extends UsesAuthRepository with UsesUserRepository {
             if (user.password == pass) Future(user)
             else Future.exception(InvalidUserIdOrPasswordException)
         )
-      sessId <- authRepository.SetSession(user.userId)
+      sessId <- authRepository.setSession(user.userId)
     } yield sessId
   }
 
   def auth(sessId: SessionId): Future[UserId] =
-    authRepository.GetSession(sessId).flatMap {
+    authRepository.getSession(sessId).flatMap {
       case Some(value) => Future(value)
       case None        => Future.exception(UnauthorizedException)
     }
