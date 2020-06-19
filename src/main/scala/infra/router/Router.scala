@@ -1,9 +1,10 @@
 package infra.router
 
 import io.finch._
+import io.finch.circe.Decoders
 import io.finch.syntax._
 
-object Router {
+object Router extends Decoders {
   val hc: Endpoint[String] = get("hc") {
     Ok("ok!")
   }

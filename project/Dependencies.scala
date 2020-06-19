@@ -7,6 +7,7 @@ object Dependencies {
     lazy val twServer = "18.8.0"
     lazy val scalaMock = "4.4.0"
     lazy val scalaTest = "3.0.5"
+    lazy val circe = "0.9.3"
   }
 
   // web server
@@ -19,6 +20,8 @@ object Dependencies {
   lazy val finagleCore = "com.twitter" %% "finagle-core" % Versions.finagle
   lazy val finagleRedis = "com.twitter" %% "finagle-redis" % Versions.finagle
   lazy val finagleMySQL = "com.twitter" %% "finagle-mysql" % Versions.finagle
+  lazy val circeGeneric = "io.circe" %% "circe-generic" % Versions.circe
+  lazy val finchCirce = "com.github.finagle" %% "finch-circe" % Versions.finch
 
   // test
   lazy val scalaTest = "org.scalatest" %% "scalatest" % Versions.scalaTest
