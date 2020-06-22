@@ -3,6 +3,8 @@ package infra.router
 import io.finch._
 import io.finch.circe.Decoders
 import io.finch.syntax._
+import io.circe.generic.auto._
+import io.finch.circe._
 
 object Router extends Decoders {
   val hc: Endpoint[String] = get("hc") {

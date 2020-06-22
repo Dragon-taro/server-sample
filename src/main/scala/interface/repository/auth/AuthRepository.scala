@@ -1,5 +1,6 @@
 package interface.repository.auth
 
+import cats.effect.IO
 import com.twitter.util.Future
 import domain.entity.auth.SessionId
 import domain.entity.user.UserAttributes.UserId
@@ -8,10 +9,10 @@ import infra.datastore.redis.{MixInRedis, UsesRedis}
 import utils.{MixInDate, UsesDate}
 
 trait AuthRepositoryImpl extends AuthRepository with UsesRedis with UsesDate {
-  def getSession(sessId: SessionId): Future[Option[UserId]] =
+  def getSession(sessId: SessionId): IO[Option[UserId]] =
     redis.get(sessId.value).map(_.map(UserId)) // voのデコード・エンコードを抽象化した方がきれいではありそう
 
-  def setSession(userId: UserId): Future[SessionId] = {
+  def setSession(userId: UserId): IO[SessionId] = {
     val sessId = createSessionId(userId)
     redis.set(sessId.value, userId.value).map(_ => sessId)
   }

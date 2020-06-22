@@ -1,6 +1,6 @@
 package usecase.user
 
-import com.twitter.util.Future
+import cats.effect.IO
 import domain.entity.auth.SessionId
 import domain.entity.errors.{
   InvalidUserIdOrPasswordException,
@@ -11,27 +11,27 @@ import interface.repository.auth.{MixInAuthRepository, UsesAuthRepository}
 import interface.repository.user.{MixInUserRepository, UsesUserRepository}
 
 trait UserUsecase extends UsesAuthRepository with UsesUserRepository {
-  def login(userId: UserId, pass: Password): Future[SessionId] = {
+  def login(userId: UserId, pass: Password): IO[SessionId] = {
     for {
       user <- userRepository
-        .FindById(userId)
+        .findById(userId)
         .flatMap {
-          case Some(user) => Future(user)
-          case None       => Future.exception(InvalidUserIdOrPasswordException)
+          case Some(user) => IO(user)
+          case None       => IO.raiseError(InvalidUserIdOrPasswordException)
         }
         .flatMap(
           user =>
-            if (user.password == pass) Future(user)
-            else Future.exception(InvalidUserIdOrPasswordException)
+            if (user.password == pass) IO(user)
+            else IO.raiseError(InvalidUserIdOrPasswordException)
         )
       sessId <- authRepository.setSession(user.userId)
     } yield sessId
   }
 
-  def auth(sessId: SessionId): Future[UserId] =
+  def auth(sessId: SessionId): IO[UserId] =
     authRepository.getSession(sessId).flatMap {
-      case Some(value) => Future(value)
-      case None        => Future.exception(UnauthorizedException)
+      case Some(value) => IO.pure(value)
+      case None        => IO.raiseError(UnauthorizedException)
     }
 }
 

@@ -22,6 +22,8 @@ object Dependencies {
   lazy val finagleMySQL = "com.twitter" %% "finagle-mysql" % Versions.finagle
   lazy val circeGeneric = "io.circe" %% "circe-generic" % Versions.circe
   lazy val finchCirce = "com.github.finagle" %% "finch-circe" % Versions.finch
+  lazy val doobieCore = "org.tpolecat" %% "doobie-core" % "0.8.8"
+  lazy val catsCore = "org.typelevel" %% "cats-core" % "2.0.0"
 
   // test
   lazy val scalaTest = "org.scalatest" %% "scalatest" % Versions.scalaTest

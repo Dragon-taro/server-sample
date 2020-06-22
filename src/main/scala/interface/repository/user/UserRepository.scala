@@ -1,7 +1,10 @@
 package interface.repository.user
 
+import cats.effect.IO
 import com.twitter.finagle.mysql._
 import com.twitter.util.Future
+import doobie._
+import doobie.implicits._
 import domain.entity.user.User
 import domain.entity.user.UserAttributes.{
   EmailAddress,
@@ -15,19 +18,12 @@ import domain.repository.user.UserRepository
 import infra.datastore.sql.{MixInSql, UsesSql}
 
 trait UserRepositoryImpl extends UserRepository with UsesSql {
-  def Find(id: Id): Future[Option[User]] = {
-    val query = "SELECT * from users where id = ?"
-    val ps = sql.client.prepare(query)
-    val result = ps.select(id.value)(decodeUser)
-
-    // もうちょいきれいに書きたい
-    result.map {
-      case Nil   => None
-      case users => users.head
-    }
+  def find(id: Id): IO[Option[User]] = {
+    val q = sql"SELECT * from users where id = ?"
+    q.query[DbUser].option.transact(sql.xa)
   }
 
-  def FindById(userId: UserId): Future[Option[User]] = {
+  def findById(userId: UserId): Future[Option[User]] = {
     val query = "SELECT * from users where id = ?"
     val ps = sql.client.prepare(query)
     val result = ps.select(userId.value)(decodeUser)

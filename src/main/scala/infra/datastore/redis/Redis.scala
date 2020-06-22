@@ -1,14 +1,17 @@
 package infra.datastore.redis
 
-import com.twitter.util.Future
+import cats.effect.IO
 import com.twitter.io.Buf.Utf8
+import utils.IO2
 
 trait Redis extends UsesRedisClient {
-  def get(key: String): Future[Option[String]] =
-    redisClient.client.get(Utf8(key)).map(_.flatMap(Utf8.unapply))
+  def get(key: String): IO[Option[String]] =
+    IO2.fromTwitterFuture(
+      redisClient.client.get(Utf8(key)).map(_.flatMap(Utf8.unapply))
+    )
 
-  def set(key: String, value: String): Future[Unit] =
-    redisClient.client.set(Utf8(key), Utf8(value))
+  def set(key: String, value: String): IO[Unit] =
+    IO2.fromTwitterFuture(redisClient.client.set(Utf8(key), Utf8(value)))
 }
 
 object Redis extends Redis with MixInRedisClient
