@@ -15,13 +15,10 @@ trait UserUsecase extends UsesAuthRepository with UsesUserRepository {
     for {
       user <- userRepository
         .findById(userId)
-        .flatMap {
-          case Some(user) => IO(user)
-          case None       => IO.raiseError(InvalidUserIdOrPasswordException)
-        }
+        .getOrElseF(IO.raiseError(InvalidUserIdOrPasswordException))
         .flatMap(
           user =>
-            if (user.password == pass) IO(user)
+            if (user.password == pass) IO.pure(user)
             else IO.raiseError(InvalidUserIdOrPasswordException)
         )
       sessId <- authRepository.setSession(user.userId)
@@ -29,10 +26,9 @@ trait UserUsecase extends UsesAuthRepository with UsesUserRepository {
   }
 
   def auth(sessId: SessionId): IO[UserId] =
-    authRepository.getSession(sessId).flatMap {
-      case Some(value) => IO.pure(value)
-      case None        => IO.raiseError(UnauthorizedException)
-    }
+    authRepository
+      .getSession(sessId)
+      .getOrElseF(IO.raiseError(UnauthorizedException))
 }
 
 object UserUsecase

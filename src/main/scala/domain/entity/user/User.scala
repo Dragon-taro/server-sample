@@ -16,6 +16,4 @@ case class User(id: Id,
                 email: EmailAddress,
                 userId: UserId,
                 password: Password,
-                role: Role,
-                createdAt: Date,
-                updatedAt: Date)
+                role: Role)

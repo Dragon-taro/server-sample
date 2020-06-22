@@ -1,9 +1,7 @@
 package interface.repository.user
 
+import cats.data.OptionT
 import cats.effect.IO
-import com.twitter.finagle.mysql._
-import com.twitter.util.Future
-import doobie._
 import doobie.implicits._
 import domain.entity.user.User
 import domain.entity.user.UserAttributes.{
@@ -18,44 +16,25 @@ import domain.repository.user.UserRepository
 import infra.datastore.sql.{MixInSql, UsesSql}
 
 trait UserRepositoryImpl extends UserRepository with UsesSql {
-  def find(id: Id): IO[Option[User]] = {
+  def find(id: Id): OptionT[IO, User] = {
     val q = sql"SELECT * from users where id = ?"
-    q.query[DbUser].option.transact(sql.xa)
+    OptionT(q.query[DbUser].option.transact(sql.xa)).map(dbUserToEntityUser)
   }
 
-  def findById(userId: UserId): Future[Option[User]] = {
-    val query = "SELECT * from users where id = ?"
-    val ps = sql.client.prepare(query)
-    val result = ps.select(userId.value)(decodeUser)
-
-    // というか共通化したい
-    result.map {
-      case Nil   => None
-      case users => users.head
-    }
+  def findById(userId: UserId): OptionT[IO, User] = {
+    val q = sql"SELECT * from users where user_id = ?"
+    OptionT(q.query[DbUser].option.transact(sql.xa)).map(dbUserToEntityUser)
   }
 
-  private def decodeUser(row: Row): Option[User] =
-    for {
-      id <- row.getInteger("id")
-      name <- row.getString("name")
-      userId <- row.getString("user_id")
-      email <- row.getString("email")
-      pass <- row.getString("password")
-      role <- row.getInteger("role")
-      createdAt <- row.getJavaSqlDate("crated_at")
-      updatedAt <- row.getJavaSqlDate("updated_at")
-    } yield
-      User(
-        Id(id),
-        Name(name),
-        EmailAddress(email),
-        UserId(userId),
-        Password(pass),
-        Role(role),
-        createdAt,
-        updatedAt
-      )
+  private def dbUserToEntityUser(dbUser: DbUser): User =
+    User(
+      Id(dbUser.id),
+      Name(dbUser.name),
+      EmailAddress(dbUser.email),
+      UserId(dbUser.userId),
+      Password(dbUser.password),
+      Role(dbUser.role)
+    )
 }
 
 object UserRepositoryImpl extends UserRepositoryImpl with MixInSql

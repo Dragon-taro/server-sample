@@ -1,13 +1,16 @@
 package infra.datastore.redis
 
+import cats.data.OptionT
 import cats.effect.IO
 import com.twitter.io.Buf.Utf8
 import utils.IO2
 
 trait Redis extends UsesRedisClient {
-  def get(key: String): IO[Option[String]] =
-    IO2.fromTwitterFuture(
-      redisClient.client.get(Utf8(key)).map(_.flatMap(Utf8.unapply))
+  def get(key: String): OptionT[IO, String] =
+    OptionT(
+      IO2.fromTwitterFuture(
+        redisClient.client.get(Utf8(key)).map(_.flatMap(Utf8.unapply))
+      )
     )
 
   def set(key: String, value: String): IO[Unit] =
