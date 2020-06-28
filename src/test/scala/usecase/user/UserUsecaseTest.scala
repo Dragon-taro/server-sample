@@ -1,10 +1,7 @@
 package usecase.user
 
-import java.sql.Date
-
 import cats.data.OptionT
 import cats.effect.IO
-import com.twitter.util.{Await, Future}
 import domain.entity.auth.SessionId
 import domain.entity.errors.{
   InvalidUserIdOrPasswordException,
