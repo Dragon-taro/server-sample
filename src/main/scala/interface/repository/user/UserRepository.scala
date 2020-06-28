@@ -26,7 +26,6 @@ trait UserRepositoryImpl extends UserRepository with UsesSql {
   }
 
   def findById(userId: UserId): OptionT[IO, User] = {
-    println(userId.value)
     val q = sql"SELECT * from users where user_id = ${userId.value}"
     OptionT(
       q.query[DbUser]

@@ -10,6 +10,7 @@ import org.http4s.implicits._
 
 import interface.controller.MixInAuthController
 import domain.entity.auth.{LoginReq, LoginResp}
+import domain.entity.errors.InvalidUserIdOrPasswordException
 
 object Router extends MixInAuthController {
   implicit val loginReqDecoder = jsonOf[IO, LoginReq]
@@ -20,11 +21,16 @@ object Router extends MixInAuthController {
       case GET -> Root / "hc" =>
         Ok("ok!")
       case req @ POST -> Root / "sessions" =>
-        for {
+        (for {
           auth <- req.as[LoginReq]
           result <- authController.login(auth)
           resp <- Ok(result.asJson)
-        } yield resp
+        } yield resp).handleErrorWith {
+          case e @ InvalidUserIdOrPasswordException =>
+            BadRequest(e.getMessage)
+          case e: Exception =>
+            InternalServerError(e.getMessage)
+        }
     }
     .orNotFound
 }
