@@ -8,9 +8,6 @@ import org.http4s.circe._
 import org.http4s.dsl.io._
 import interface.controller.MixInAuthController
 import domain.entity.auth.{LoginReq, LoginResp}
-import domain.entity.errorResp.ErrorResp
-import domain.entity.errors.InvalidUserIdOrPasswordException
-import org.http4s.dsl.io.{->, BadRequest, InternalServerError, Ok, POST, Root}
 
 object AuthRouter extends MixInAuthController {
   implicit val loginReqDecoder = jsonOf[IO, LoginReq]
@@ -23,11 +20,6 @@ object AuthRouter extends MixInAuthController {
           auth <- req.as[LoginReq]
           result <- authController.login(auth)
           resp <- Ok(result.asJson)
-        } yield resp).handleErrorWith {
-          case e @ InvalidUserIdOrPasswordException =>
-            BadRequest(ErrorResp.fromException(e).asJson)
-          case e: Exception =>
-            InternalServerError(ErrorResp.fromException(e).asJson)
-        }
+        } yield resp).handleErrorWith(ErrorHandling.handler)
     }
 }
