@@ -6,31 +6,28 @@ import io.circe.syntax._
 import org.http4s._
 import org.http4s.circe._
 import org.http4s.dsl.io._
-import org.http4s.implicits._
-
 import interface.controller.MixInAuthController
 import domain.entity.auth.{LoginReq, LoginResp}
+import domain.entity.errorResp.ErrorResp
 import domain.entity.errors.InvalidUserIdOrPasswordException
+import org.http4s.dsl.io.{->, BadRequest, InternalServerError, Ok, POST, Root}
 
-object Router extends MixInAuthController {
+object AuthRouter extends MixInAuthController {
   implicit val loginReqDecoder = jsonOf[IO, LoginReq]
   implicit val loginRespDecoder = jsonOf[IO, LoginResp]
 
   val routes = HttpRoutes
     .of[IO] {
-      case GET -> Root / "hc" =>
-        Ok("ok!")
-      case req @ POST -> Root / "sessions" =>
+      case req @ POST -> Root =>
         (for {
           auth <- req.as[LoginReq]
           result <- authController.login(auth)
           resp <- Ok(result.asJson)
         } yield resp).handleErrorWith {
           case e @ InvalidUserIdOrPasswordException =>
-            BadRequest(e.getMessage)
+            BadRequest(ErrorResp.fromException(e).asJson)
           case e: Exception =>
-            InternalServerError(e.getMessage)
+            InternalServerError(ErrorResp.fromException(e).asJson)
         }
     }
-    .orNotFound
 }
