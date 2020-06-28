@@ -1,19 +1,23 @@
 package interface.controller
 
-import com.twitter.util.Await
+import cats.effect.IO
+import domain.entity.auth.{LoginReq, LoginResp}
 import domain.entity.user.UserAttributes.{Password, UserId}
-import usecase.user.UsesUserUsecase
+import usecase.user.{MixInUserUsecase, UsesUserUsecase}
 
 trait AuthController extends UsesUserUsecase {
-  def login(userId: UserId, password: Password): String = {
-    val mockUserId = UserId("DragonTaro")
-    val mockPassword = Password("hogehgoe")
+  def login(req: LoginReq): IO[LoginResp] = {
+    val userId = UserId(req.userId)
+    val pass = Password(req.password)
 
-    val futResult =
-      userUsecase.login(mockUserId, mockPassword).map(_.value).handle {
-        case e: Exception => e.getMessage
-      }
-
-    Await.result(futResult)
+    userUsecase
+      .login(userId, pass)
+      .map(v => LoginResp(v.value))
   }
+}
+
+object AuthController extends AuthController with MixInUserUsecase
+
+trait MixInAuthController {
+  val authController: AuthController = AuthController
 }

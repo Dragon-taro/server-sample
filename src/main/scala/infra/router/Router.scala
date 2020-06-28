@@ -1,18 +1,30 @@
 package infra.router
 
-import io.finch._
-import io.finch.circe.Decoders
-import io.finch.syntax._
+import cats.effect._
 import io.circe.generic.auto._
-import io.finch.circe._
+import io.circe.syntax._
+import org.http4s._
+import org.http4s.circe._
+import org.http4s.dsl.io._
+import org.http4s.implicits._
 
-object Router extends Decoders {
-  val hc: Endpoint[String] = get("hc") {
-    Ok("ok!")
-  }
+import interface.controller.MixInAuthController
+import domain.entity.auth.{LoginReq, LoginResp}
 
-  val service = (hc :+: UserRouter.router).handle {
-    case fe: io.finch.Error => BadRequest(new Exception(fe))
-    case e: Exception       => InternalServerError(e)
-  }.toServiceAs
+object Router extends MixInAuthController {
+  implicit val loginReqDecoder = jsonOf[IO, LoginReq]
+  implicit val loginRespDecoder = jsonOf[IO, LoginResp]
+
+  val routes = HttpRoutes
+    .of[IO] {
+      case GET -> Root / "hc" =>
+        Ok("ok!")
+      case req @ POST -> Root / "sessions" =>
+        for {
+          auth <- req.as[LoginReq]
+          result <- authController.login(auth)
+          resp <- Ok(result.asJson)
+        } yield resp
+    }
+    .orNotFound
 }

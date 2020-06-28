@@ -17,24 +17,34 @@ import infra.datastore.sql.{MixInSql, UsesSql}
 
 trait UserRepositoryImpl extends UserRepository with UsesSql {
   def find(id: Id): OptionT[IO, User] = {
-    val q = sql"SELECT * from users where id = ?"
-    OptionT(q.query[DbUser].option.transact(sql.xa)).map(dbUserToEntityUser)
+    val q = sql"SELECT * from users where id = ${id.value}"
+    OptionT(
+      q.query[DbUser]
+        .option
+        .transact(sql.xa)
+    ).map(dbUserToEntityUser)
   }
 
   def findById(userId: UserId): OptionT[IO, User] = {
-    val q = sql"SELECT * from users where user_id = ?"
-    OptionT(q.query[DbUser].option.transact(sql.xa)).map(dbUserToEntityUser)
+    println(userId.value)
+    val q = sql"SELECT * from users where user_id = ${userId.value}"
+    OptionT(
+      q.query[DbUser]
+        .option
+        .transact(sql.xa)
+    ).map(dbUserToEntityUser)
   }
 
-  private def dbUserToEntityUser(dbUser: DbUser): User =
+  private def dbUserToEntityUser(dbUser: DbUser): User = {
     User(
       Id(dbUser.id),
       Name(dbUser.name),
-      EmailAddress(dbUser.email),
-      UserId(dbUser.userId),
+      EmailAddress(dbUser.email_address),
+      UserId(dbUser.user_id),
       Password(dbUser.password),
       Role(dbUser.role)
     )
+  }
 }
 
 object UserRepositoryImpl extends UserRepositoryImpl with MixInSql

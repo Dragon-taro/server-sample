@@ -1,7 +1,5 @@
 package domain.entity.user
 
-import java.sql.Date
-
 import domain.entity.user.UserAttributes.{
   EmailAddress,
   Id,
